@@ -6,33 +6,12 @@ import java.util.Scanner;
 
 public class Cluster {
 
-    public  Cluster(String url) throws SQLException{
-
-
-        String content=BoilerPipe.getContent(url);
-        HashMap<String,Double> hm=getHashmap(content);
-        for(Map.Entry<String,Double> e:hm.entrySet()){
-            add(e.getKey());
-        }
-        add("#");
-
-
-
-        Connection con= DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/googlenews?user=root&password=qwerty123");
+    public void addToCluster(int article_id, HashMap<String,Double> hm, String category, Connection con) throws SQLException{
         PreparedStatement ps;
         ResultSet result;
-        String query="SELECT * FROM business where url = '"+url+"'";
-        ps=con.prepareStatement(query);
-        result=ps.executeQuery();
-        int articleID=0;
-        if(result.next()) {
-            articleID=result.getInt("id");
-        }
-
-
+        String query;
         HashMap<String,Double> hmWord=new HashMap<>();
-        ps=con.prepareStatement("SELECT * FROM words");
+        ps=con.prepareStatement("SELECT * FROM "+category+"_words");
         result=ps.executeQuery();
         while(result.next()){
             hmWord.put(result.getString("word"),(double)result.getInt("documentFrequency"));
@@ -43,23 +22,22 @@ public class Cluster {
         }
         hm= updateIDF(hm,hmWord);
 
-        query="SELECT id,url FROM business ";
+        query="SELECT id,content FROM "+category+"_content ";
         ps=con.prepareStatement(query);
         result=ps.executeQuery();
 
         while(result.next()){
             int curID=result.getInt("id");
-            if(curID==articleID){
+            if(curID==article_id){
                 continue;
             }
-            String curContent=BoilerPipe.getContent(result.getString("url"));
+            String curContent=result.getString("content");
             HashMap<String,Double> hmcur=getHashmap(curContent);
             hmcur=updateIDF(hmcur,hmWord);
             if(similarity(hm,hmcur)){
-                System.out.println("these articles are similar "+articleID+" "+curID);
+                System.out.println("these articles of category "+category+" are similar "+article_id+" "+curID);
             }
         }
-        con.close();
     }
 
     private boolean similarity(HashMap<String,Double> hm1,HashMap<String,Double> hm2){
@@ -75,7 +53,7 @@ public class Cluster {
             mod2 += e.getValue() * e.getValue();
         }
 //        System.out.println(dot+" "+mod1+" "+mod2);
-        return dot/(Math.sqrt(mod1)*Math.sqrt(mod2))>0.15;
+        return dot/(Math.sqrt(mod1)*Math.sqrt(mod2))>0.2;
 
     }
 
@@ -95,25 +73,26 @@ public class Cluster {
         return hm;
     }
 
-    private void add(String word)throws SQLException{
-        Connection con= DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/googlenews?user=root&password=qwerty123");
-        PreparedStatement ps;
-        ps=con.prepareStatement("select * from words where word='"+word+"'");
-        ResultSet result=ps.executeQuery();
-        if(result.next()){
-            ps=con.prepareStatement("update words set documentFrequency = documentFrequency + 1 where word = '"+word+"'");
-            ps.executeUpdate();
-        }else{
-            try {
-                ps = con.prepareStatement("INSERT INTO words (word , documentFrequency) values('" + word + "',1)");
-                ps.executeUpdate();
-            }catch (Exception e){
-                System.out.println("Word too big "+word);
-            }
-        }
-        con.close();
-    }
+//    private void add(String word)throws SQLException{
+//        Connection con= DriverManager.getConnection(
+//                "jdbc:mysql://localhost:3306/googlenews?user=root&password=qwerty123");
+//        PreparedStatement ps;
+//        ps=con.prepareStatement("select * from words where word='"+word+"'");
+//        ResultSet result=ps.executeQuery();
+//        if(result.next()){
+//            ps=con.prepareStatement("update words set documentFrequency = documentFrequency + 1 where word = '"+word+"'");
+//            ps.executeUpdate();
+//        }else{
+//            try {
+//                ps = con.prepareStatement("INSERT INTO words (word , documentFrequency) values('" + word + "',1)");
+//                ps.executeUpdate();
+//            }catch (Exception e){
+//                System.out.println("Word too big "+word);
+//            }
+//        }
+//        con.close();
+//    }
+
     private HashMap<String,Double> getHashmap(String content){
         HashMap<String,Double> hm=new HashMap<>();
         Scanner sc=new Scanner(content);
@@ -135,7 +114,6 @@ public class Cluster {
 
 
     private double calculateIDF(Double wordInDocuments, Double totalDocuments){
-//        return Math.log(1+(totalDocuments/wordInDocuments));
         return Math.log((totalDocuments/wordInDocuments));
     }
 }

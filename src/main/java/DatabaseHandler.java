@@ -2,10 +2,7 @@ import javax.print.DocFlavor;
 import javax.swing.text.html.HTMLDocument;
 import java.io.FileNotFoundException;
 import java.sql.*;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Iterator;
+import java.util.*;
 import javax.xml.transform.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -16,23 +13,20 @@ import java.io.FileReader;
 // You need to change database name, table name, password
 public class DatabaseHandler {
 
-    public Connection connecttodatabase() throws SQLException, ClassNotFoundException {
-        Class.forName("com.mysql.jdbc.Driver");
-        Connection con= DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/googlenews","root","!rnthakur123");
+//    public Connection connecttodatabase() throws SQLException, ClassNotFoundException {
+//
+//        return con;
+//    }
+//
+//    public void connectionclose(Connection con) throws SQLException {
+//        con.close();
+//    }
 
-        return con;
-    }
-
-    public void connectionclose(Connection con) throws SQLException {
-        con.close();
-    }
-
-    public void insertotable(String tablename, String database, String password, NewsArticle newsArticle, Connection con) {
+    public void insertToTable(String category, NewsArticle newsArticle, Connection con) {
         try{
 
             java.sql.Timestamp date = new java.sql.Timestamp(new java.util.Date().getTime());
-            String query = " insert into " + tablename +" (title, url, pubdate, inserttime, category)"
+            String query = " insert into " + category +" (title, url, pubdate, inserttime, category)"
                     + " values (?, ?, ?, ?, ?)";
 
             PreparedStatement preparedStmt = con.prepareStatement(query);
@@ -42,13 +36,87 @@ public class DatabaseHandler {
             preparedStmt.setTimestamp(4, date);
             preparedStmt.setString    (5, newsArticle.getCategory());
             preparedStmt.execute();
-        }catch(Exception e){ System.out.println(e);}
+            int article_id = -1;
+            query = "SELECT id FROM "+category+" where url = '"+newsArticle.getUrl()+"'";
+            preparedStmt=con.prepareStatement(query);
+            ResultSet resultSet = preparedStmt.executeQuery();
+            if(resultSet.next()){
+                article_id = resultSet.getInt("id");
+            }
+            String content =BoilerPipe.getContent(newsArticle.getUrl());
+            query = "insert into "+category+"_content (id, content) values(?, ?)";
+            preparedStmt = con.prepareStatement(query);
+            preparedStmt.setInt(1,article_id);
+            preparedStmt.setString(2, content);
+            preparedStmt.execute();
+            HashMap<String,Double> hm=getHashmap(content);
+            for(Map.Entry<String,Double> e:hm.entrySet()){
+                add(category,e.getKey(),con);
+            }
+            add(category,"#",con);
+            new Cluster().addToCluster(article_id, hm, category, con);
+
+        }catch(Exception e){ e.printStackTrace();}
     }
-    /*
-    public void inserttolastest(Map<String,String> prevstore,String tablename, Connection con) {
+
+   public int checkIfExists(Connection con, String category, String val) throws SQLException {
+      /* Statement stmt = con.createStatement();
+       ResultSet rs = stmt.executeQuery("SELECT * from latest  WHERE url = \"jk\"");
+
+       while(rs.next()) {
+           System.out.println(rs.getString(3));
+       }
+       */
+
+       final String queryCheck = "SELECT * from " + category +" WHERE url = ?";
+       final PreparedStatement ps = con.prepareStatement(queryCheck);
+       ps.setString(1, val);
+       final ResultSet resultSet = ps.executeQuery();
+       if(resultSet.next()) {
+           return 1;
+       }
+       return 0;
+   }
+
+    private void add(String category, String word, Connection con )throws SQLException{
+        PreparedStatement ps;
+        ps=con.prepareStatement("select * from "+category+"_words where word='"+word+"'");
+        ResultSet result=ps.executeQuery();
+        if(result.next()){
+            ps=con.prepareStatement("update "+category+"_words set documentFrequency = documentFrequency + 1 where word = '"+word+"'");
+            ps.executeUpdate();
+        }else{
+            try {
+                ps = con.prepareStatement("INSERT INTO "+category+"_words (word , documentFrequency) values('" + word + "',1)");
+                ps.executeUpdate();
+            }catch (Exception e){
+                System.out.println("Word too big "+word);
+            }
+        }
+    }
+    private HashMap<String,Double> getHashmap(String content){
+        HashMap<String,Double> hm=new HashMap<>();
+        Scanner sc=new Scanner(content);
+        while(sc.hasNext()){
+            String s=sc.next();
+            if(s.length()>31){
+                continue;
+            }
+            if(hm.get(s)==null){
+
+                hm.put(s,1.0);
+            }else{
+                hm.put(s,hm.get(s)+1);
+            }
+        }
+        sc.close();
+        return hm;
+    }
+     /*
+    public void inserttolastest(Map<String,String> prevstore,String category, Connection con) {
         try {
             Iterator it = prevstore.entrySet().iterator();
-            String query = " insert into " + tablename +" (rsssource, url, inserttime)"
+            String query = " insert into " + category +" (rsssource, url, inserttime)"
                     + " values (?, ?, ?)";
 
             while(it.hasNext()) {
@@ -106,22 +174,5 @@ public class DatabaseHandler {
         stmt.executeUpdate(query);
    }
 */
-   public int checkifexists(Connection con, String tablename, String val) throws SQLException {
-      /* Statement stmt = con.createStatement();
-       ResultSet rs = stmt.executeQuery("SELECT * from latest  WHERE url = \"jk\"");
 
-       while(rs.next()) {
-           System.out.println(rs.getString(3));
-       }
-       */
-
-       final String queryCheck = "SELECT * from " + tablename +" WHERE url = ?";
-       final PreparedStatement ps = con.prepareStatement(queryCheck);
-       ps.setString(1, val);
-       final ResultSet resultSet = ps.executeQuery();
-       if(resultSet.next()) {
-           return 1;
-       }
-       return 0;
-   }
 }

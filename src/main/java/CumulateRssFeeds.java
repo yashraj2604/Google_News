@@ -1,5 +1,6 @@
 import java.io.FileNotFoundException;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.concurrent.Executor;
@@ -13,13 +14,15 @@ import java.util.Map;
 public class CumulateRssFeeds {
 
     public static void main(String[] args) throws FileNotFoundException, InterruptedException, SQLException, ClassNotFoundException {
-        String path = "/Users/yash.raj/Documents/Googlenewsdata/";
+        String path = "";
 
-        String businesspath = path + "business.txt";
-        String sportspath = path + "sports.txt";
-        String politicpath = path + "politics.txt";
+//        String businesspath = path + "business.txt";
+//        String sportspath = path + "sports.txt";
+//        String politicpath = path + "politics.txt";
 
-        Connection con = new DatabaseHandler().connecttodatabase();
+        Class.forName("com.mysql.jdbc.Driver");
+        Connection con= DriverManager.getConnection(
+                "jdbc:mysql://localhost:3306/googlenews","root","qwerty123");
 
         //Map<String,String> prevstore = new DatabaseHandler().retreivefromlatest(con);
        // Map<String,String> prevstore = new HashMap<String, String>();
@@ -29,13 +32,13 @@ public class CumulateRssFeeds {
         //new RssExtractor(path + "business" + ".txt", "business", "!rnthakur123", con).run();
 
             ExecutorService executor = Executors.newFixedThreadPool(5);
-            String paths[] = {"sports", "business", "politics"};
+            String fileNames[] = {"sports", "business", "politics"};
 
 
             //new RssExtractor()
-            for (String p : paths) {
+            for (String p : fileNames) {
 
-                RssExtractor rssExtractor = new RssExtractor(path + p + ".txt", p, "!rnthakur123", con);
+                RssExtractor rssExtractor = new RssExtractor(path + p + ".txt", p, "qwerty123", con);
 
                 executor.execute(rssExtractor);
             }
@@ -50,11 +53,11 @@ public class CumulateRssFeeds {
           //  new DatabaseHandler().inserttolastest(prevstore,"latest",con);
 
             System.out.println("yo");
-            Thread.sleep(10 * 1000 ); // 100 seconds
+            Thread.sleep(300 * 1000 ); // 100 seconds
             System.out.println("helloagain");
+//            break;
         }
-
-        //new DatabaseHandler().connectionclose(con);
+//        con.close();
 
     }
 }
