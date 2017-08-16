@@ -2,6 +2,7 @@ import javax.print.DocFlavor;
 import javax.swing.text.html.HTMLDocument;
 import java.io.FileNotFoundException;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import javax.xml.transform.*;
 import java.io.BufferedReader;
@@ -26,15 +27,17 @@ public class DatabaseHandler {
         try{
 
             java.sql.Timestamp date = new java.sql.Timestamp(new java.util.Date().getTime());
-            String query = " insert into " + category +" (title, url, pubdate, inserttime, category)"
-                    + " values (?, ?, ?, ?, ?)";
 
+            String query = " insert into " + category +" (title, url, pubdate, inserttime, category, articleScore)"
+                    + " values (?, ?, ?, ?, ?, ?)";
+            SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             PreparedStatement preparedStmt = con.prepareStatement(query);
             preparedStmt.setString (1, newsArticle.getTitle());
             preparedStmt.setString (2, newsArticle.getUrl());
             preparedStmt.setString   (3, newsArticle.getPubDate());
             preparedStmt.setTimestamp(4, date);
             preparedStmt.setString    (5, newsArticle.getCategory());
+            preparedStmt.setLong(6,sdf.parse(newsArticle.getPubDate()).getTime());
             preparedStmt.execute();
             int article_id = -1;
             query = "SELECT id FROM "+category+" where url = '"+newsArticle.getUrl()+"'";
@@ -50,11 +53,12 @@ public class DatabaseHandler {
             preparedStmt.setString(2, content);
             preparedStmt.execute();
             HashMap<String,Double> hm=getHashmap(content);
+
+            add(category,"#",con);
             for(Map.Entry<String,Double> e:hm.entrySet()){
                 add(category,e.getKey(),con);
             }
-            add(category,"#",con);
-            new Cluster().addToCluster(article_id, hm, category, con);
+            new Cluster().addToCluster(article_id, hm, category, con, sdf.parse(newsArticle.getPubDate()).getTime());
 
         }catch(Exception e){ e.printStackTrace();}
     }

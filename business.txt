@@ -1,3 +1,4 @@
 http://www.businessinsider.in/rss_section_feeds/2147477994.cms
 http://timesofindia.indiatimes.com/rssfeeds/1898055.cms
-http://abcnews.go.com/abcnews/moneyheadlines
+http://feeds.feedburner.com/ndtvprofit-latest
+http://www.deccanherald.com/rss-internal/business.rss

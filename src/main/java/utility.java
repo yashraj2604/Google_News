@@ -10,7 +10,7 @@ public class utility {
         String[] tok = d.split(" ");
         // Code for parsing the month and year has not been implemented, we are taking data only for the month of august and year is 2017
         sb.append("2017-");
-        if(tok[2].equals("Aug")){
+        if(tok[2].equals("Aug")||tok[2].equals("August")){
             sb.append("08-");
         }else{
             sb.append("07-");

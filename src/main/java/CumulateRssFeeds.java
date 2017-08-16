@@ -18,7 +18,7 @@ public class CumulateRssFeeds {
 
 //        String businesspath = path + "business.txt";
 //        String sportspath = path + "sports.txt";
-//        String politicpath = path + "politics.txt";
+//        String politicpath = path + "politics.txt";h
 
         Class.forName("com.mysql.jdbc.Driver");
         Connection con= DriverManager.getConnection(
@@ -53,7 +53,7 @@ public class CumulateRssFeeds {
           //  new DatabaseHandler().inserttolastest(prevstore,"latest",con);
 
             System.out.println("yo");
-            Thread.sleep(300 * 1000 ); // 100 seconds
+            Thread.sleep(300 * 1000 ); // 300 seconds
             System.out.println("helloagain");
 //            break;
         }

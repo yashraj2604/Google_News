@@ -2,3 +2,5 @@ http://timesofindia.indiatimes.com/rssfeeds/4719148.cms
 http://abcnews.go.com/abcnews/sportsheadlines
 http://www.indiatvnews.com/rssfeed/cricket.xml
 http://www.indiatvnews.com/rssfeed/tennis.xml
+http://www.deccanherald.com/rss-internal/sports.rss
+http://feeds.feedburner.com/ndtvsports-latest
