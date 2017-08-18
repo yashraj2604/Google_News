@@ -1,4 +1,5 @@
 http://www.businessinsider.in/rss_section_feeds/21806995.cms
+http://feeds.foxnews.com/foxnews/politics
+http://feeds.bbci.co.uk/news/politics/rss.xml
 http://timesofindia.indiatimes.com/rssfeeds/-2128936835.cms
-http://www.thehindubusinessline.com/news/national/?service=rss
 http://indianexpress.com/section/india/politics/feed/

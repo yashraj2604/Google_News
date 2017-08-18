@@ -2,60 +2,35 @@ import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.Map;
 
-/**
- * Created by yash.raj on 11/08/17.
- */
+
 public class CumulateRssFeeds {
 
     public static void main(String[] args) throws FileNotFoundException, InterruptedException, SQLException, ClassNotFoundException {
         String path = "";
-
-//        String businesspath = path + "business.txt";
-//        String sportspath = path + "sports.txt";
-//        String politicpath = path + "politics.txt";h
-
         Class.forName("com.mysql.jdbc.Driver");
         Connection con= DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/googlenews","root","qwerty123");
-
-        //Map<String,String> prevstore = new DatabaseHandler().retreivefromlatest(con);
-       // Map<String,String> prevstore = new HashMap<String, String>();
-
+                "jdbc:mysql://localhost:3306/newsv2","root","qwerty123");
 
         while(true) {
-        //new RssExtractor(path + "business" + ".txt", "business", "!rnthakur123", con).run();
-
-            ExecutorService executor = Executors.newFixedThreadPool(5);
-            String fileNames[] = {"sports", "business", "politics"};
-
-
+            ExecutorService executor = Executors.newFixedThreadPool(1);
+            String fileNames[] = {"sports","business","politics","science","health","technology","entertainment"};
             //new RssExtractor()
             for (String p : fileNames) {
-
-                RssExtractor rssExtractor = new RssExtractor(path + p + ".txt", p, "qwerty123", con);
-
+                RssExtractor rssExtractor = new RssExtractor(path + p + ".txt", p, con);
                 executor.execute(rssExtractor);
             }
             executor.shutdown();
-
-           // System.out.println(prevstore.size());
-
             while (!executor.isTerminated()) {
             }
 
-         //   new DatabaseHandler().createtablelatest(con);
-          //  new DatabaseHandler().inserttolastest(prevstore,"latest",con);
 
-            System.out.println("yo");
-            Thread.sleep(300 * 1000 ); // 300 seconds
-            System.out.println("helloagain");
-//            break;
+            System.out.println("Run ended");
+//            Thread.sleep(300 * 1000 ); // 300 seconds
+            System.out.println("Running Again");
+            break;
         }
 //        con.close();
 

@@ -1,14 +1,13 @@
-/**
- * Created by yash.raj on 10/08/17.
- */
 import java.sql.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
 public class MySqlConn {
-    public static void main(String args[]) throws ParseException{
-        String temp="2017-08-16 14:55:59";
+    public static void main(String args[]) throws ClassNotFoundException,SQLException{
+        String databaseName = "newsv2";
 
+        String newCategories[]={"sports","business","politics","science","health","technology","entertainment"};
+        for (int i = 0; i < newCategories.length; i++) {
+            new TableCreator(databaseName, newCategories[i]);
+        }
 
     }
 

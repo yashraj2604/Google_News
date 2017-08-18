@@ -1,64 +1,49 @@
-/**
- * Created by yash.raj on 09/08/17.
- */
+import org.jsoup.Jsoup;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Vector;
 import org.w3c.dom.Node;
 
 
-public class XmlExtractor {
+public class XmlExtractor  {
 
     // The function takes the url of the rss feed and returns a vector of NewsArticle
-    public Vector<NewsArticle> execute(String url, String category) {
-        String tags[] = {"title", "pubDate","link"};
-        String title = null;
-        String pubdate = null;
-        String link = null;
-        String desc = null;
-        String cat = category;
+    public static Vector<NewsArticle> execute(String url, String category) throws InterruptedException {
 
-        Vector<NewsArticle> newsArticle = new Vector<NewsArticle>();
+        Vector<NewsArticle> newsArticles = new Vector<>();
         try {
-            DocumentBuilderFactory inputFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = inputFactory.newDocumentBuilder();
-            Document document = (Document) builder.parse(url);
+            Document document = (Document) DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(url);
 
-          //  System.out.println(document.getDocumentElement().getNodeName());
             NodeList nodes = document.getElementsByTagName("item");
 
-          //  System.out.println(nodes.getLength());
-
-            for(int i=0;i<nodes.getLength();i++) {
+            for(int i=0;i<nodes.getLength()&&i<50;i++) {
                 Node node = nodes.item(i);
-              //  System.out.println("Current element : " + node.getNodeName());
 
                 if(node.getNodeType() == Node.ELEMENT_NODE) {
                     Element element = (Element) node;
-
-                    title = element.getElementsByTagName("title").item(0).getTextContent();
-                    pubdate = new utility().toDate(element.getElementsByTagName("pubDate").item(0).getTextContent());
-
-
-                 //   System.out.println(pubdate);
-                    link = element.getElementsByTagName("link").item(0).getTextContent();
-                    newsArticle.add(new NewsArticle(title,link,pubdate,cat));
+                    String title = element.getElementsByTagName("title").item(0).getTextContent();
+                    if(title.length()<20){
+                        continue;
+                    }
+                    SimpleDateFormat sdf=new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+                    Timestamp pubDate = new Timestamp(sdf.parse(element.getElementsByTagName("pubDate").item(0).getTextContent()).getTime());
+                    String description = Jsoup.parse(element.getElementsByTagName("description").item(0).getTextContent()).text();
+                    if(description.length()>1020){
+                        description=description.substring(0,1020);
+                    }
+                    String link = element.getElementsByTagName("link").item(0).getTextContent();
+                    newsArticles.add(new NewsArticle(title,description,link,pubDate,category));
                 }
             }
 
         } catch (Exception e) {
              e.printStackTrace();
         }
-
-        return newsArticle;
+        return newsArticles;
     }
-/*
-    public static void main(String[] args) {
-        Vector<NewsArticle> vec = new XmlExtractor().execute("http://timesofindia.indiatimes.com/rssfeedstopstories.cms","hhdd");
-    }
-*/
 }

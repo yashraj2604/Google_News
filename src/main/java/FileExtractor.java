@@ -1,32 +1,23 @@
-/**
- * Created by yash.raj on 09/08/17.
- */
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.Vector;
 
 public class FileExtractor {
 
-    public Vector<String> run(String filepath) {
+    public static Vector<String> extractRSSFeeds(String filepath) {
 
-        BufferedReader br = null;
-        FileReader fr = null;
-        Vector<String> vector = new Vector<String>();
+        Vector<String> vector = new Vector<>();
 
         try {
-            fr = new FileReader(filepath);
-            br = new BufferedReader(fr);
+            FileReader  fr = new FileReader(filepath);
+            BufferedReader br = new BufferedReader(fr);
 
-            String currentline;
+            String currentLine;
 
-            while((currentline = br.readLine()) != null) {
-                vector.add(currentline);
+            while((currentLine = br.readLine()) != null) {
+                vector.add(currentLine);
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
