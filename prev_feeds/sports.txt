@@ -1,0 +1,7 @@
+http://www.espn.com/espn/rss/news
+http://www.nytimes.com/services/xml/rss/nyt/Sports.xml
+http://feeds.foxnews.com/foxnews/sports
+http://timesofindia.indiatimes.com/rssfeeds/4719148.cms
+http://www.deccanherald.com/rss-internal/sports.rss
+http://feeds.feedburner.com/ndtvsports-latest
+http://rss.cnn.com/rss/edition_sport.rss

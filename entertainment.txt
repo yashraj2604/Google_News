@@ -1,0 +1,6 @@
+http://feeds.foxnews.com/foxnews/entertainment
+http://rss.cnn.com/rss/edition_entertainment.rss
+http://www.latimes.com/entertainment/rss2.0.xml
+http://www.nbcnewyork.com/entertainment/top-stories/?rss=y&embedThumb=y&summary=y
+http://nypost.com/entertainment/feed/
+http://feeds.reuters.com/reuters/entertainment

@@ -3,24 +3,10 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import java.sql.Connection;
 import java.util.Vector;
 
-// This class is used to continuously extract RSS feeds from
-public class RssExtractor implements Runnable {
-
-    private String path;
-    private String category;
-    private Connection con;
-    private WebClient webClient;
-
-    public RssExtractor(String path,String category, Connection con, WebClient webClient) {
-        this.category = category;
-        this.path = path;
-        this.con = con;
-        this.webClient = webClient;
-    }
-    public void run() {
-        System.out.println("RSS being extracted for " + category + " category.");
-        // This will extract all the RSS url from text files.
-        Vector<String> rssFeeds = FileExtractor.extractRSSFeeds(path);
+public class PopularFeed {
+    public static void addToDatabase(Connection con, WebClient webClient){
+        String category = "popular";
+        Vector<String> rssFeeds = FileExtractor.extractRSSFeeds("popular.txt");
         try {
             for (String rss : rssFeeds) {
                 String[] tok = rss.split("/");
@@ -29,7 +15,7 @@ public class RssExtractor implements Runnable {
                 for (int i = newsArticles.size() - 1; i >= 0; i--) {
                     // insert into database logic here;
                     if (!DatabaseHandler.doesUrlExistsInDatabase(category, newsArticles.get(i).getUrl(), con)) {
-                        DatabaseHandler.insertToTable(category, newsArticles.get(i), con,webClient);
+                        DatabaseHandler.insertDetailsToDatabase(newsArticles.get(i), category, con, webClient);
                     }
                 }
             }
@@ -37,5 +23,6 @@ public class RssExtractor implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 }

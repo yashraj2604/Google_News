@@ -1,0 +1,5 @@
+http://www.nytimes.com/services/xml/rss/nyt/Science.xml
+http://feeds.foxnews.com/foxnews/science
+http://feeds.bbci.co.uk/news/science_and_environment/rss.xml
+http://timesofindia.indiatimes.com/rssfeeds/-2128672765.cms
+http://rss.cnn.com/rss/edition_space.rss

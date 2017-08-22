@@ -1,0 +1,8 @@
+http://rss.cnn.com/rss/edition_technology.rss
+http://feeds.nytimes.com/nyt/rss/Technology
+http://feeds.foxnews.com/foxnews/tech
+http://www.latimes.com/business/technology/rss2.0.xml
+https://www.cnbc.com/id/19854910/device/rss/rss.html
+http://www.nbcnewyork.com/news/tech/?rss=y&embedThumb=y&summary=y
+http://nypost.com/tech/feed/
+http://feeds.reuters.com/reuters/technologyNews

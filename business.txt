@@ -1,6 +1,6 @@
 http://rss.nytimes.com/services/xml/rss/nyt/Business.xml
-http://www.businessinsider.in/rss_section_feeds/2147477994.cms
-http://timesofindia.indiatimes.com/rssfeeds/1898055.cms
-http://feeds.feedburner.com/ndtvprofit-latest
-http://www.deccanherald.com/rss-internal/business.rss
-http://feeds.bbci.co.uk/news/business/rss.xml
+http://www.latimes.com/business/rss2.0.xml
+https://www.cnbc.com/id/10001147/device/rss/rss.html
+http://nypost.com/business/feed/
+http://feeds.reuters.com/reuters/businessNews
+http://www.politico.com/rss/politics08.xml

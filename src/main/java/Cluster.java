@@ -3,12 +3,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
+
 public class Cluster {
 
-    private static final long CLUSTER_CONSTANT = 18000000;
-    private static final double COSINE_THRESHOLD=0.25;
+    private static final long CLUSTER_CONSTANT = TimeUnit.HOURS.toMillis(5);
+    private static final double COSINE_THRESHOLD = 0.25;
+    private static final double CLUSTER_COSINE_THRESHOLD = 0.05;
+    private static final double DUPLICATE_THRESHOLD = 0.85;
 
-    public void addToCluster(int article_id, HashMap<String,Double> hm, String category, Connection con, long articleScore) throws SQLException{
+    public static void addToCluster(int article_id, HashMap<String,Double> hm, String category, Connection con, long articleScore) throws SQLException{
         PreparedStatement ps;
         ResultSet result;
         String query;
@@ -41,6 +45,8 @@ public class Cluster {
             while (result.next()) {
                 articleIDs.add(result.getInt("id"));
             }
+            ArrayList<Double> similarities=new ArrayList<>();
+
             for (Integer curArticleID : articleIDs) {
                 query = "SELECT content FROM " + category + "_content where id=" + curArticleID;
                 ps = con.prepareStatement(query);
@@ -50,11 +56,32 @@ public class Cluster {
                     HashMap<String, Double> hmcur = getHashMap(curContent);
                     hmcur = updateIDF(hmcur, hmWord);
                     double sim = similarity(hm, hmcur);
-                    if (sim > COSINE_THRESHOLD) {
-                        if (sim > bestMatchSimilarity) {
-                            bestMatchCluster = clusterID;
-                            bestMatchSimilarity = sim;
-                        }
+                    if(sim>DUPLICATE_THRESHOLD){
+                        query="SELECT url FROM "+category + " WHERE id="+article_id+" OR id = " + curArticleID;
+                        result=ps.executeQuery(query);
+                        result.next();
+                        String dup1=result.getString("url");
+                        result.next();
+                        String dup2=result.getString("url");
+                        System.out.println("These articles are duplicate "+dup1+" "+dup2 + " with similarity " + sim);
+                        removeFromDatabase(article_id, category,con);
+                        return;
+                    }
+                    similarities.add(sim);
+
+                }
+            }
+            boolean flag=true;
+            for(Double sim:similarities){
+                if(sim<CLUSTER_COSINE_THRESHOLD){
+                    flag=false;
+                }
+            }
+            if(flag){
+                for(Double sim:similarities){
+                    if (sim > COSINE_THRESHOLD && sim>bestMatchSimilarity) {
+                        bestMatchCluster = clusterID;
+                        bestMatchSimilarity = sim;
                     }
                 }
             }
@@ -87,7 +114,17 @@ public class Cluster {
         }
     }
 
-    private double similarity(HashMap<String,Double> hm1,HashMap<String,Double> hm2){
+    private static void removeFromDatabase(int articleID, String category, Connection con) throws SQLException{
+        PreparedStatement ps;
+        String query = "DELETE FROM "+category + "_content WHERE id = "+articleID;
+        ps=con.prepareStatement(query);
+        ps.execute();
+        query= "DELETE FROM "+category + " WHERE id = "+articleID;
+        ps=con.prepareStatement(query);
+        ps.execute();
+    }
+
+    private static double similarity(HashMap<String,Double> hm1,HashMap<String,Double> hm2){
         double dot=0,mod1=0,mod2=0;
         for(Map.Entry<String,Double> e:hm1.entrySet()){
             mod1+=e.getValue()*e.getValue();
@@ -101,7 +138,7 @@ public class Cluster {
         return dot/(Math.sqrt(mod1)*Math.sqrt(mod2));
     }
 
-    private HashMap<String,Double> updateIDF(HashMap<String,Double> hm, HashMap<String,Double> hmWord){
+    private static HashMap<String,Double> updateIDF(HashMap<String,Double> hm, HashMap<String,Double> hmWord){
         ArrayList<String > badWords =new ArrayList<>();
         for(Map.Entry<String, Double> e:hm.entrySet()) {
             try {
@@ -117,7 +154,7 @@ public class Cluster {
         return hm;
     }
 
-    private HashMap<String,Double> getHashMap(String content){
+    private static HashMap<String,Double> getHashMap(String content){
         HashMap<String,Double> hm=new HashMap<>();
         Scanner sc=new Scanner(content);
         while(sc.hasNext()){
@@ -137,7 +174,7 @@ public class Cluster {
     }
 
 
-    private double calculateIDF(Double wordInDocuments, Double totalDocuments){
+    private static double calculateIDF(Double wordInDocuments, Double totalDocuments){
         return Math.log((totalDocuments/wordInDocuments));
     }
 }

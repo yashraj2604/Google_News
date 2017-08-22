@@ -1,0 +1,3 @@
+http://feeds.foxnews.com/foxnews/entertainment
+http://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml
+http://rss.cnn.com/rss/edition_entertainment.rss

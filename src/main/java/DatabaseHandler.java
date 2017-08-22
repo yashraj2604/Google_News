@@ -1,10 +1,13 @@
+import com.gargoylesoftware.htmlunit.WebClient;
+
+import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 
 public class DatabaseHandler {
 
 
-    public static void insertToTable(String category, NewsArticle newsArticle, Connection con) {
+    public static void insertToTable(String category, NewsArticle newsArticle, Connection con, WebClient webClient) {
 
         try{
 
@@ -14,7 +17,7 @@ public class DatabaseHandler {
                 return ;
             }
 
-            insertDetailsToDatabase(newsArticle, category, con);
+            insertDetailsToDatabase(newsArticle, category, con,webClient);
 
             int article_id=getArticleID(newsArticle, category, con);
 
@@ -26,7 +29,7 @@ public class DatabaseHandler {
                 addWordToDatabase(e.getKey(), category, con);
             }
 
-            new Cluster().addToCluster(article_id, hm, category, con, newsArticle.getPubDate().getTime());
+            Cluster.addToCluster(article_id, hm, category, con, newsArticle.getPubDate().getTime());
 
         }catch(Exception e){
             e.printStackTrace();
@@ -34,9 +37,10 @@ public class DatabaseHandler {
     }
 
    public static boolean doesUrlExistsInDatabase(String category, String url, Connection con) throws SQLException {
-       final String queryCheck = "SELECT * FROM " + category +" WHERE url = ?";
+       final String queryCheck = "SELECT * FROM " + category +" WHERE url = ? ";
        final PreparedStatement ps = con.prepareStatement(queryCheck);
        ps.setString(1, url);
+//       ps.setString(2, title);
        final ResultSet resultSet = ps.executeQuery();
        return resultSet.next();
    }
@@ -89,9 +93,12 @@ public class DatabaseHandler {
         return content.length() >= 200 && words >= 100 && numerals * 7 <= chars;
     }
 
-    private static void insertDetailsToDatabase(NewsArticle newsArticle, String category, Connection con) throws SQLException{
-        String query = " insert into " + category +" (title, url, pubdate, inserttime, category, articleScore, description)"
-                + " values (?, ?, ?, ?, ?, ?,?)";
+    public static void insertDetailsToDatabase(NewsArticle newsArticle, String category, Connection con, WebClient webClient) throws SQLException, IOException {
+
+        String imageurl=ImageScraper.scrapeImages(newsArticle.getUrl(),webClient,newsArticle.getTitle());
+        String query = " insert into " + category +" (title, url, pubdate, inserttime, category, articleScore, description, imageUrl)"
+                + " values (?, ?, ?, ?, ?, ?,?,?)";
+
         PreparedStatement preparedStmt = con.prepareStatement(query);
         preparedStmt.setString (1, newsArticle.getTitle());
         preparedStmt.setString (2, newsArticle.getUrl());
@@ -100,6 +107,7 @@ public class DatabaseHandler {
         preparedStmt.setString    (5, newsArticle.getCategory());
         preparedStmt.setLong(6, newsArticle.getPubDate().getTime());
         preparedStmt.setString(7, newsArticle.getDescription());
+        preparedStmt.setString(8,imageurl);
         preparedStmt.execute();
     }
 

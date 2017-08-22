@@ -1,0 +1,4 @@
+http://feeds.bbci.co.uk/news/health/rss.xml
+http://feeds.foxnews.com/foxnews/health
+http://www.nytimes.com/services/xml/rss/nyt/Health.xml
+http://timesofindia.indiatimes.com/rssfeeds/3908999.cms

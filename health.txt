@@ -1,0 +1,5 @@
+http://feeds.foxnews.com/foxnews/health
+http://www.nytimes.com/services/xml/rss/nyt/Health.xml
+http://www.latimes.com/health/rss2.0.xml
+https://www.cnbc.com/id/10000108/device/rss/rss.htmls
+http://feeds.reuters.com/reuters/healthNews
